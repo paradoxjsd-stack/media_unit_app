@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Generate Roster{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">Generate Duty Roster</h1>
+
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <div class="mb-8 p-6 bg-red-50 rounded-lg border border-red-200">
+            <h2 class="text-xl font-bold text-red-900 mb-2">{{ template.name }}</h2>
+            <p class="text-red-800 text-sm">{{ template.description or 'No description' }}</p>
+            <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-red-800">
+                <div>
+                    <strong>Days:</strong>
+                    {% set day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                    {% for day in template.days_of_week %}{{ day_names[day] }}{% if not loop.last %}, {% endif %}{% endfor %}
+                </div>
+                <div>
+                    <strong>Time:</strong> {{ template.start_time }}-{{ template.end_time }}
+                </div>
+                <div>
+                    <strong>Roles:</strong> {{ template.roles|join(', ') }}
+                </div>
+                <div>
+                    <strong>Per Slot:</strong> {{ template.members_per_slot }} member(s)
+                </div>
+            </div>
+        </div>
+
+        <form id="generateForm" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date *</label>
+                    <input type="date" name="start_date" value="{{ template.start_date.strftime('%Y-%m-%d') }}" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">End Date (Optional)</label>
+                    <input type="date" name="end_date" value="{{ template.end_date.strftime('%Y-%m-%d') if template.end_date else '' }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500">
+                    <p class="text-sm text-gray-600 mt-2">Leave blank for one-time generation, or set a range for recurring rosters</p>
+                </div>
+            </div>
+
+            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <h3 class="font-semibold text-gray-900 mb-4">Generation Options</h3>
+                
+                <label class="flex items-center gap-3 mb-4 cursor-pointer">
+                    <input type="checkbox" name="clear_existing" class="w-4 h-4 text-blue-600 rounded">
+                    <span class="text-gray-700">Clear existing rosters for this template before generating</span>
+                </label>
+
+                <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" name="notify_members" class="w-4 h-4 text-blue-600 rounded">
+                    <span class="text-gray-700">Notify assigned members via email (if enabled)</span>
+                </label>
+            </div>
+
+            <div class="bg-yellow-50 p-6 rounded-lg border border-yellow-200">
+                <p class="text-sm text-yellow-800">
+                    <strong>Note:</strong> This will generate duty roster entries for all selected days within the date range. 
+                    Members will be assigned using a round-robin algorithm from the selected subunits.
+                </p>
+            </div>
+
+            <div class="flex gap-4 pt-6 border-t">
+                <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg">
+                    🚀 Generate Rosters
+                </button>
+                <a href="{{ url_for('roster.roster_templates') }}" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg text-center">
+                    Cancel
+                </a>
+            </div>
+
+            <div id="progress" class="hidden mt-6 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                <div class="flex items-center gap-4">
+                    <div class="animate-spin">🔄</div>
+                    <div>
+                        <p class="font-semibold text-blue-900">Generating rosters...</p>
+                        <p class="text-sm text-blue-800" id="progressText">Please wait while we generate the roster entries.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="result" class="hidden mt-6 p-6 bg-green-50 rounded-lg border border-green-200">
+                <p class="font-semibold text-green-900 mb-2">✓ Rosters Generated Successfully!</p>
+                <p class="text-sm text-green-800" id="resultText"></p>
+                <div class="mt-4">
+                    <a href="{{ url_for('roster.view_rosters') }}" class="bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
+                        View Generated Rosters
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('generateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(document.getElementById('generateForm'));
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    
+    // Hide form and show progress
+    submitBtn.style.display = 'none';
+    document.getElementById('progress').classList.remove('hidden');
+    
+    try {
+        const response = await fetch('{{ url_for("roster.generate_roster", template_id=template.id) }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        document.getElementById('progress').classList.add('hidden');
+        
+        if (data.success) {
+            document.getElementById('resultText').textContent = `${data.count} roster entries have been generated successfully!`;
+            document.getElementById('result').classList.remove('hidden');
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error occurred'));
+            submitBtn.style.display = 'block';
+            document.getElementById('progress').classList.add('hidden');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+        submitBtn.style.display = 'block';
+        document.getElementById('progress').classList.add('hidden');
+    }
+});
+</script>
+{% endblock %}

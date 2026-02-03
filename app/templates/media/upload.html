@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Media - Media Unit Management{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <h2 class="text-3xl font-bold text-blue-600 mb-2">Upload Media</h2>
+        <p class="text-gray-600 mb-8">Add new media files to the library</p>
+
+        <form id="uploadForm" class="space-y-6">
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">Title *</label>
+                <input type="text" name="title" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">Description</label>
+                <textarea name="description" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="Optional description..."></textarea>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Media Type *</label>
+                    <select name="media_type" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="">Select type</option>
+                        <option value="photo">Photo</option>
+                        <option value="audio">Audio</option>
+                        <option value="graphics">Graphics</option>
+                        <option value="video">Video</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Subunit (Optional)</label>
+                    <select name="subunit_id" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                        <option value="">Select subunit</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Event Name (Optional)</label>
+                    <input type="text" name="event_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" placeholder="e.g., Sunday Service">
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Event Date (Optional)</label>
+                    <input type="date" name="event_date" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">Media File *</label>
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition" id="dropZone">
+                    <input type="file" name="media_file" id="fileInput" required class="hidden" accept="image/*,audio/*,.pdf,.zip">
+                    <div id="fileDisplay" class="text-center">
+                        <div class="text-4xl mb-2">📁</div>
+                        <p class="text-gray-700 font-bold">Drag and drop your file here</p>
+                        <p class="text-gray-600 text-sm">or click to select (Max 50MB)</p>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-bold text-lg">
+                Upload Media
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+const dropZone = document.getElementById('dropZone');
+const fileInput = document.getElementById('fileInput');
+const fileDisplay = document.getElementById('fileDisplay');
+
+// Drag and drop
+dropZone.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropZone.classList.add('border-blue-500', 'bg-blue-50');
+});
+
+dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+});
+
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('border-blue-500', 'bg-blue-50');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        updateFileDisplay();
+    }
+});
+
+dropZone.addEventListener('click', () => fileInput.click());
+
+fileInput.addEventListener('change', updateFileDisplay);
+
+function updateFileDisplay() {
+    if (fileInput.files.length > 0) {
+        const file = fileInput.files[0];
+        fileDisplay.innerHTML = `
+            <div class="text-green-500">✅</div>
+            <p class="text-gray-800 font-bold">${file.name}</p>
+            <p class="text-gray-600 text-sm">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+        `;
+    }
+}
+
+document.getElementById('uploadForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    
+    const formData = new FormData(document.getElementById('uploadForm'));
+    
+    try {
+        const response = await fetch('{{ url_for("media.upload_media") }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            alert('Media uploaded successfully!');
+            window.location.href = '{{ url_for("media.library") }}';
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        alert('Upload failed: ' + error);
+    }
+});
+</script>
+{% endblock %}

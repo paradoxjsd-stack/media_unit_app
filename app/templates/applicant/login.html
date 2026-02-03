@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Applicant Login - Media Unit{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-100 py-12 px-4">
+    <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+        <div class="text-center mb-8">
+            <div class="text-5xl mb-4">👤</div>
+            <h1 class="text-3xl font-bold text-red-600 mb-2">Member Login</h1>
+            <p class="text-gray-600">Access your personal dashboard</p>
+        </div>
+
+        {% if error %}
+        <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" class="space-y-6">
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">Email Address</label>
+                <input type="email" name="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500" placeholder="your@email.com">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-bold mb-2">Password</label>
+                <input type="password" name="password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500" placeholder="Enter your password">
+            </div>
+
+            <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 font-bold text-lg transition">
+                Sign In
+            </button>
+        </form>
+
+        <div class="mt-8 pt-8 border-t">
+            <p class="text-center text-gray-600 mb-4">Don't have an account yet?</p>
+            <a href="{{ url_for('applicant.application_form') }}" class="block w-full bg-gray-100 text-gray-700 py-3 rounded-lg hover:bg-gray-200 font-bold text-lg text-center transition">
+                Submit Application
+            </a>
+        </div>
+
+        <div class="mt-6 pt-6 border-t text-center text-sm text-gray-600">
+            <p>Having trouble logging in?</p>
+            <p><a href="#" class="text-red-600 hover:text-red-800 font-semibold">Contact the Media Unit</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block title %}Application Form - Media Unit Management{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="bg-white rounded-lg shadow-lg p-8">
+        <h2 class="text-3xl font-bold text-red-600 mb-2">Media Unit Application</h2>
+        <p class="text-gray-600 mb-8">Tell us about yourself and your interest in joining our media team.</p>
+
+        <form id="applicationForm" class="space-y-8">
+            <!-- Personal Information -->
+            <div class="border-t pt-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Personal Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Full Name *</label>
+                        <input type="text" name="full_name" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Email *</label>
+                        <input type="email" name="email" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Phone</label>
+                        <input type="tel" name="phone" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Date of Birth</label>
+                        <input type="date" name="date_of_birth" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Occupation</label>
+                        <input type="text" name="occupation" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500" placeholder="e.g., Software Engineer, Student, etc.">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Primary Interest *</label>
+                        <select name="primary_interest" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                            <option value="">Select a subunit</option>
+                            {% for subunit in subunits %}
+                            <option value="{{ subunit.name }}">{{ subunit.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media -->
+            <div class="border-t pt-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Social Media (Optional)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Facebook URL</label>
+                        <input type="url" name="facebook" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Instagram URL</label>
+                        <input type="url" name="instagram" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Background & Availability -->
+            <div class="border-t pt-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Background & Availability</h3>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Professional Background</label>
+                        <textarea name="professional_background" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500" placeholder="Tell us about your experience in media, technology, or related fields..."></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-gray-700 font-bold mb-2">Availability</label>
+                        <textarea name="availability" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500" placeholder="When are you available? (e.g., Sundays, weekday evenings, etc.)"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Skill Assessment -->
+            <div class="border-t pt-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Skill Assessment</h3>
+                <p class="text-gray-600 mb-4">Rate your proficiency on a scale of 1-5 (1=Beginner, 5=Expert)</p>
+                
+                <div id="skillsContainer" class="space-y-4">
+                    <!-- Skills will be dynamically added based on selected subunit -->
+                </div>
+            </div>
+
+            <!-- Pictures Upload -->
+            <div class="border-t pt-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">📸 Pictures (Optional)</h3>
+                <p class="text-gray-600 mb-6">Upload profile or work sample pictures. Supported formats: JPG, PNG, GIF (Max 10MB each)</p>
+                
+                <div class="space-y-4">
+                    <!-- Profile Picture -->
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-3">Profile Picture</label>
+                        <div class="border-2 border-dashed border-red-300 rounded-lg p-8 text-center hover:border-red-500 transition cursor-pointer bg-red-50">
+                            <input type="file" name="profile_picture" accept="image/*" class="hidden" id="profilePictureInput">
+                            <label for="profilePictureInput" class="cursor-pointer">
+                                <div class="text-4xl mb-2">📷</div>
+                                <p class="text-gray-700 font-medium">Click to upload or drag and drop</p>
+                                <p class="text-gray-500 text-sm">One profile picture (JPG, PNG, GIF up to 10MB)</p>
+                            </label>
+                            <p id="profilePictureName" class="text-red-600 text-sm mt-2" style="display:none;"></p>
+                        </div>
+                    </div>
+                    
+                    <!-- Portfolio Pictures -->
+                    <div>
+                        <label class="block text-gray-700 font-semibold mb-3">Portfolio Pictures (Work Samples)</label>
+                        <div class="border-2 border-dashed border-red-300 rounded-lg p-8 text-center hover:border-red-500 transition cursor-pointer bg-red-50">
+                            <input type="file" name="portfolio_pictures" accept="image/*" multiple class="hidden" id="portfolioPicturesInput">
+                            <label for="portfolioPicturesInput" class="cursor-pointer">
+                                <div class="text-4xl mb-2">🖼️</div>
+                                <p class="text-gray-700 font-medium">Click to upload or drag and drop</p>
+                                <p class="text-gray-500 text-sm">Multiple portfolio pictures showing your work (JPG, PNG, GIF up to 10MB each)</p>
+                            </label>
+                            <p id="portfolioPicturesName" class="text-red-600 text-sm mt-2" style="display:none;"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Creation -->
+            <div class="border-t pt-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">🔐 Create Your Account</h3>
+                <p class="text-gray-600 mb-6">Create a password to access your personal dashboard where you can track your application status and manage your profile.</p>
+                
+                <div class="bg-red-50 p-6 rounded-lg border border-red-200 mb-6">
+                    <h4 class="font-semibold text-red-900 mb-4">Dashboard Features:</h4>
+                    <ul class="space-y-2 text-red-800">
+                        <li>✓ Track your application status</li>
+                        <li>✓ Update your profile and skills</li>
+                        <li>✓ View personalized suggestions</li>
+                        <li>✓ Access team resources</li>
+                        <li>✓ Schedule training and orientation</li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <label class="block text-gray-700 font-bold mb-2">Create Password *</label>
+                    <input type="password" name="password" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-red-500" placeholder="Minimum 6 characters">
+                    <p class="text-gray-500 text-sm mt-2">Use a strong password with letters, numbers, and symbols</p>
+                </div>
+            </div>
+
+            <!-- Portfolio Upload -->
+            <div class="border-t pt-8">
+                <h3 class="text-xl font-bold text-gray-800 mb-6">Portfolio (Optional)</h3>
+                <p class="text-gray-600 mb-4">Upload samples of your work (images, PDFs, audio files, etc.)</p>
+                
+                <div id="portfolioContainer" class="space-y-4">
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6">
+                        <input type="file" name="portfolio_1" multiple class="portfolio-input">
+                        <p class="text-gray-500 text-sm mt-2">Drag files here or click to select. Max 50MB per file.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit -->
+            <div class="border-t pt-8">
+                <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 font-bold text-lg">
+                    Submit Application
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+const subunitSkills = {
+    'Display Team': ['PowerPoint', 'ProPresenter', 'Video', 'Graphics', 'Technical Skills'],
+    'Photography & Post-Processing': ['Photography', 'Photoshop', 'Lightroom', 'Composition'],
+    'Audio - Live Mix & Stage': ['Mixing Console', 'Audio Equipment', 'Sound Design', 'Troubleshooting'],
+    'Audio Recording & Archiving': ['Recording Equipment', 'Audio Editing', 'File Management', 'Post-Production'],
+    'Graphics Design': ['Design Software', 'Adobe Creative Suite', 'Illustration', 'Web Design']
+};
+
+document.querySelector('select[name="primary_interest"]').addEventListener('change', function() {
+    const subunit = this.value;
+    const skillsContainer = document.getElementById('skillsContainer');
+    skillsContainer.innerHTML = '';
+    
+    if (subunit && subunitSkills[subunit]) {
+        subunitSkills[subunit].forEach(skill => {
+            const div = document.createElement('div');
+            div.className = 'flex items-center justify-between bg-gray-50 p-4 rounded';
+            div.innerHTML = `
+                <label class="text-gray-700 font-medium">${skill}</label>
+                <div class="flex space-x-2">
+                    ${[1,2,3,4,5].map(i => `
+                        <label class="cursor-pointer">
+                            <input type="radio" name="skill_${skill}" value="${i}" class="hidden">
+                            <span class="inline-block w-8 h-8 border-2 border-gray-300 rounded text-center leading-6 text-gray-600 hover:border-red-500">${i}</span>
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+            skillsContainer.appendChild(div);
+        });
+    }
+});
+
+// Handle profile picture upload
+document.getElementById('profilePictureInput').addEventListener('change', function() {
+    const fileName = this.files[0]?.name || '';
+    const nameDisplay = document.getElementById('profilePictureName');
+    if (fileName) {
+        nameDisplay.textContent = `✓ Selected: ${fileName}`;
+        nameDisplay.style.display = 'block';
+    }
+});
+
+// Handle portfolio pictures upload
+document.getElementById('portfolioPicturesInput').addEventListener('change', function() {
+    const fileCount = this.files.length;
+    const nameDisplay = document.getElementById('portfolioPicturesName');
+    if (fileCount > 0) {
+        nameDisplay.textContent = `✓ Selected: ${fileCount} picture(s)`;
+        nameDisplay.style.display = 'block';
+    }
+});
+
+document.getElementById('applicationForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    try {
+        const response = await fetch('{{ url_for("applicant.submit_application") }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.href = `{{ url_for('applicant.application_success', applicant_id=0) }}`.replace('0', data.applicant_id);
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        alert('Submission failed: ' + error);
+    }
+});
+</script>
+{% endblock %}

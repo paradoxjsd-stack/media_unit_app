@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Duty Roster Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">Duty Roster Management</h1>
+    
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+            <h3 class="text-lg font-semibold text-blue-900 mb-2">Active Templates</h3>
+            <p class="text-3xl font-bold text-blue-600">{{ templates|length }}</p>
+        </div>
+        <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+            <h3 class="text-lg font-semibold text-green-900 mb-2">Assigned Duties</h3>
+            <p class="text-3xl font-bold text-green-600">{{ rosters|selectattr('status', 'equalto', 'assigned')|list|length }}</p>
+        </div>
+        <div class="bg-purple-50 p-6 rounded-lg border border-purple-200">
+            <h3 class="text-lg font-semibold text-purple-900 mb-2">Confirmed Duties</h3>
+            <p class="text-3xl font-bold text-purple-600">{{ rosters|selectattr('status', 'equalto', 'confirmed')|list|length }}</p>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex flex-wrap gap-4 mb-8">
+        <a href="{{ url_for('roster.roster_templates') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">
+            📋 Manage Templates
+        </a>
+        <a href="{{ url_for('roster.create_template') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded">
+            ➕ Create Template
+        </a>
+        <a href="{{ url_for('roster.view_rosters') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded">
+            👁️ View All Rosters
+        </a>
+    </div>
+
+    <!-- Recent Rosters -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-100 px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">Recent Duty Assignments</h2>
+        </div>
+        
+        {% if rosters %}
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Time</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Member</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Role</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Subunit</th>
+                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for roster in rosters[:10] %}
+                    <tr class="border-b border-gray-200 hover:bg-gray-50">
+                        <td class="px-6 py-4 text-sm text-gray-900">{{ roster.duty_date.strftime('%Y-%m-%d') }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            {% if roster.start_time %}{{ roster.start_time }}-{{ roster.end_time }}{% else %}TBA{% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-900">{{ roster.assigned_to }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ roster.role }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">{{ roster.subunit }}</td>
+                        <td class="px-6 py-4 text-sm">
+                            {% if roster.status == 'confirmed' %}
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                {{ roster.status|capitalize }}
+                            </span>
+                            {% elif roster.status == 'assigned' %}
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
+                                {{ roster.status|capitalize }}
+                            </span>
+                            {% elif roster.status == 'completed' %}
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+                                {{ roster.status|capitalize }}
+                            </span>
+                            {% else %}
+                            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                                {{ roster.status|capitalize }}
+                            </span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="px-6 py-12 text-center text-gray-500">
+            <p>No duty rosters created yet. <a href="{{ url_for('roster.create_template') }}" class="text-blue-600 hover:underline">Create a template</a> to get started.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Templates Quick View -->
+    {% if templates %}
+    <div class="mt-8 bg-white rounded-lg shadow-md overflow-hidden">
+        <div class="bg-gray-100 px-6 py-4 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-800">Active Templates</h2>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+            {% for template in templates[:6] %}
+            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-lg transition">
+                <h3 class="font-bold text-lg text-gray-900 mb-2">{{ template.name }}</h3>
+                <p class="text-sm text-gray-600 mb-3">{{ template.description or 'No description' }}</p>
+                
+                <div class="space-y-2 text-sm mb-4">
+                    <p><strong>Days:</strong> 
+                        {% set day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                        {% for day in template.days_of_week %}{{ day_names[day] }}{% if not loop.last %}, {% endif %}{% endfor %}
+                    </p>
+                    <p><strong>Time:</strong> {{ template.start_time }}-{{ template.end_time }}</p>
+                    <p><strong>Roles:</strong> {{ template.roles|join(', ') }}</p>
+                </div>
+                
+                <div class="flex gap-2">
+                    <a href="{{ url_for('roster.generate_roster', template_id=template.id) }}" 
+                       class="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded text-center text-sm font-semibold">
+                        Generate
+                    </a>
+                    <a href="{{ url_for('roster.edit_template', template_id=template.id) }}" 
+                       class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 rounded text-center text-sm font-semibold">
+                        Edit
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

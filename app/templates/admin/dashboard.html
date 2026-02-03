@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Media Unit Management{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h2 class="text-3xl font-bold text-gray-800">Admin Dashboard</h2>
+    <p class="text-gray-600">Welcome, {{ session.get('username') }}!</p>
+</div>
+
+<!-- Stats Cards -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="text-3xl font-bold text-blue-600">{{ total_applicants }}</div>
+        <div class="text-gray-600">Total Applicants</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="text-3xl font-bold text-yellow-600">{{ pending_applications }}</div>
+        <div class="text-gray-600">Pending Review</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="text-3xl font-bold text-green-600">{{ approved_members }}</div>
+        <div class="text-gray-600">Approved Members</div>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+        <div class="text-3xl font-bold text-purple-600">{{ status_summary.completed }}</div>
+        <div class="text-gray-600">Completed</div>
+    </div>
+</div>
+
+<!-- Status Breakdown -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8">
+    <div class="bg-gradient-to-br from-red-400 to-red-600 text-white rounded-lg shadow p-6">
+        <div class="text-2xl font-bold">{{ status_summary.pending }}</div>
+        <div>Pending</div>
+    </div>
+    <div class="bg-gradient-to-br from-green-400 to-green-600 text-white rounded-lg shadow p-6">
+        <div class="text-2xl font-bold">{{ status_summary.approved }}</div>
+        <div>Approved</div>
+    </div>
+    <div class="bg-gradient-to-br from-gray-400 to-gray-600 text-white rounded-lg shadow p-6">
+        <div class="text-2xl font-bold">{{ status_summary.rejected }}</div>
+        <div>Rejected</div>
+    </div>
+    <div class="bg-gradient-to-br from-blue-400 to-blue-600 text-white rounded-lg shadow p-6">
+        <div class="text-2xl font-bold">{{ status_summary.completed }}</div>
+        <div>Completed</div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+    <a href="{{ url_for('admin.applicants_list') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+        <div class="text-2xl mb-2">👥</div>
+        <h3 class="font-bold text-gray-800">View All Applicants</h3>
+        <p class="text-gray-600 text-sm">Review and manage applications</p>
+    </a>
+    <a href="{{ url_for('admin.reports') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+        <div class="text-2xl mb-2">📊</div>
+        <h3 class="font-bold text-gray-800">Generate Reports</h3>
+        <p class="text-gray-600 text-sm">View summary reports</p>
+    </a>
+    <a href="{{ url_for('media.upload_media') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+        <div class="text-2xl mb-2">📁</div>
+        <h3 class="font-bold text-gray-800">Upload Media</h3>
+        <p class="text-gray-600 text-sm">Add new media files</p>
+    </a>
+    <a href="{{ url_for('roster.roster_dashboard') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition">
+        <div class="text-2xl mb-2">📋</div>
+        <h3 class="font-bold text-gray-800">Duty Rosters</h3>
+        <p class="text-gray-600 text-sm">Manage duty assignments</p>
+    </a>
+</div>
+
+<!-- Recent Applicants -->
+<div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-xl font-bold text-gray-800 mb-4">Recent Applications</h3>
+    <table class="w-full">
+        <thead class="border-b-2 border-gray-300">
+            <tr>
+                <th class="text-left py-2 text-gray-700">Name</th>
+                <th class="text-left py-2 text-gray-700">Email</th>
+                <th class="text-left py-2 text-gray-700">Interest</th>
+                <th class="text-left py-2 text-gray-700">Status</th>
+                <th class="text-left py-2 text-gray-700">Applied</th>
+                <th class="text-left py-2 text-gray-700">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for applicant in recent_applicants %}
+            <tr class="border-b border-gray-200 hover:bg-gray-50">
+                <td class="py-3 text-gray-800">{{ applicant.full_name }}</td>
+                <td class="py-3 text-gray-600">{{ applicant.email }}</td>
+                <td class="py-3 text-gray-600">{{ applicant.primary_interest }}</td>
+                <td class="py-3">
+                    <span class="px-3 py-1 rounded-full text-sm font-bold
+                        {% if applicant.status == 'pending' %}
+                            bg-yellow-100 text-yellow-800
+                        {% elif applicant.status == 'approved' %}
+                            bg-green-100 text-green-800
+                        {% elif applicant.status == 'completed' %}
+                            bg-blue-100 text-blue-800
+                        {% else %}
+                            bg-red-100 text-red-800
+                        {% endif %}
+                    ">
+                        {{ applicant.status.capitalize() }}
+                    </span>
+                </td>
+                <td class="py-3 text-gray-600 text-sm">{{ applicant.created_at.strftime('%b %d, %Y') }}</td>
+                <td class="py-3">
+                    <a href="{{ url_for('admin.view_applicant', applicant_id=applicant.id) }}" class="text-blue-600 hover:underline">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

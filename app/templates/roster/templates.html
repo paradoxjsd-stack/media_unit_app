@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Roster Templates{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-4xl font-bold">Roster Templates</h1>
+        <a href="{{ url_for('roster.create_template') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded">
+            ➕ Create Template
+        </a>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="mb-6 p-4 rounded-lg {% if category == 'error' %}bg-red-100 text-red-800{% else %}bg-green-100 text-green-800{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% if templates.items %}
+    <div class="space-y-4">
+        {% for template in templates.items %}
+        <div class="bg-white rounded-lg shadow-md p-6 border-l-4 {% if template.is_active %}border-green-500{% else %}border-gray-300{% endif %}">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">{{ template.name }}</h2>
+                    <p class="text-gray-600 text-sm mt-1">{{ template.description or 'No description' }}</p>
+                </div>
+                <div class="flex gap-2">
+                    <a href="{{ url_for('roster.edit_template', template_id=template.id) }}" 
+                       class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Edit</a>
+                    <a href="{{ url_for('roster.generate_roster', template_id=template.id) }}" 
+                       class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded">Generate</a>
+                    <button onclick="deleteTemplate({{ template.id }})" 
+                            class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Delete</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                <div>
+                    <p class="font-semibold text-gray-700">Days</p>
+                    <p class="text-gray-600">
+                        {% set day_names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+                        {% for day in template.days_of_week %}{{ day_names[day] }}{% if not loop.last %}, {% endif %}{% endfor %}
+                    </p>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-700">Time</p>
+                    <p class="text-gray-600">{{ template.start_time }}-{{ template.end_time }}</p>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-700">Per Slot</p>
+                    <p class="text-gray-600">{{ template.members_per_slot }} member(s)</p>
+                </div>
+                <div>
+                    <p class="font-semibold text-gray-700">Active Period</p>
+                    <p class="text-gray-600">{{ template.start_date.strftime('%Y-%m-%d') }} to {{ template.end_date.strftime('%Y-%m-%d') if template.end_date else 'Ongoing' }}</p>
+                </div>
+            </div>
+
+            <div class="border-t pt-4">
+                <p class="text-sm"><strong>Roles:</strong> {{ template.roles|join(', ') or 'Not specified' }}</p>
+                <p class="text-sm mt-2"><strong>Status:</strong> 
+                    <span class="inline-block px-3 py-1 rounded-full text-xs font-semibold {% if template.is_active %}bg-green-100 text-green-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {% if template.is_active %}Active{% else %}Inactive{% endif %}
+                    </span>
+                </p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if templates.pages > 1 %}
+    <div class="flex justify-center gap-2 mt-8">
+        {% if templates.prev_num %}
+        <a href="{{ url_for('roster.roster_templates', page=templates.prev_num) }}" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Previous</a>
+        {% endif %}
+        
+        {% for page_num in templates.iter_pages() %}
+            {% if page_num %}
+                {% if page_num == templates.page %}
+                <span class="bg-red-600 text-white py-2 px-4 rounded">{{ page_num }}</span>
+                {% else %}
+                <a href="{{ url_for('roster.roster_templates', page=page_num) }}" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">{{ page_num }}</a>
+                {% endif %}
+            {% else %}
+            <span class="px-4 py-2">...</span>
+            {% endif %}
+        {% endfor %}
+        
+        {% if templates.next_num %}
+        <a href="{{ url_for('roster.roster_templates', page=templates.next_num) }}" class="bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="bg-gray-50 rounded-lg p-12 text-center">
+        <p class="text-gray-600 text-lg mb-6">No roster templates created yet</p>
+        <a href="{{ url_for('roster.create_template') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg">
+            Create Your First Template
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function deleteTemplate(templateId) {
+    if (confirm('Are you sure you want to delete this template? This will also delete all associated rosters.')) {
+        fetch(`{{ url_for('roster.delete_template', template_id=0) }}`.replace('0', templateId), {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

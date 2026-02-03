@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}{% if template %}Edit Template{% else %}Create Roster Template{% endif %}{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <h1 class="text-4xl font-bold mb-8">{% if template %}Edit{% else %}Create{% endif %} Roster Template</h1>
+
+    <form id="templateForm" class="bg-white rounded-lg shadow-md p-8 space-y-6">
+        <!-- Basic Information -->
+        <div class="border-b pb-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Basic Information</h2>
+            
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Template Name *</label>
+                <input type="text" name="name" value="{{ template.name if template else '' }}" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                       placeholder="e.g., Sunday Morning Worship">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+                <textarea name="description" 
+                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                         rows="3" placeholder="Optional description for this template">{{ template.description if template else '' }}</textarea>
+            </div>
+        </div>
+
+        <!-- Schedule Configuration -->
+        <div class="border-b pb-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Schedule Configuration</h2>
+
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-4">Days of Week *</label>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {% set day_names = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                    {% for i in range(7) %}
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="days" value="{{ i }}"
+                               {% if template and i in template.days_of_week %}checked{% endif %}
+                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                        <span class="text-gray-700">{{ day_names[i] }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Start Date *</label>
+                    <input type="date" name="start_date" value="{{ template.start_date.strftime('%Y-%m-%d') if template else '' }}" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">End Date (Optional)</label>
+                    <input type="date" name="end_date" value="{{ template.end_date.strftime('%Y-%m-%d') if template and template.end_date else '' }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Start Time *</label>
+                    <input type="time" name="start_time" value="{{ template.start_time if template else '' }}" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">End Time *</label>
+                    <input type="time" name="end_time" value="{{ template.end_time if template else '' }}" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+        </div>
+
+        <!-- Roles and Assignments -->
+        <div class="border-b pb-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Roles and Assignments</h2>
+
+            <div class="mb-6">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Roles (comma-separated) *</label>
+                <input type="text" name="roles" value="{{ template.roles|join(', ') if template else '' }}" required
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                       placeholder="e.g., Lead Singer, Drummer, Guitarist, Sound Tech">
+                <p class="text-sm text-gray-600 mt-2">Enter role names separated by commas</p>
+            </div>
+
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Members Per Slot *</label>
+                <input type="number" name="members_per_slot" value="{{ template.members_per_slot if template else 1 }}" required min="1" max="10"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-sm text-gray-600 mt-2">How many people to assign per role slot</p>
+            </div>
+        </div>
+
+        <!-- Subunits -->
+        <div class="pb-6">
+            <h2 class="text-2xl font-bold text-gray-900 mb-6">Subunits *</h2>
+            <p class="text-sm text-gray-600 mb-4">Select which subunits members can be assigned from:</p>
+            
+            <div class="space-y-3">
+                {% for subunit in subunits %}
+                <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                    <input type="checkbox" name="subunits" value="{{ subunit.id }}"
+                           {% if template and subunit.id in template.subunits %}checked{% endif %}
+                           class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                    <div>
+                        <p class="font-semibold text-gray-900">{{ subunit.name }}</p>
+                        <p class="text-sm text-gray-600">{{ subunit.description or 'No description' }}</p>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-4 pt-6 border-t">
+            <button type="submit" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg">
+                {% if template %}Update Template{% else %}Create Template{% endif %}
+            </button>
+            <a href="{{ url_for('roster.roster_templates') }}" class="flex-1 bg-gray-400 hover:bg-gray-500 text-white font-bold py-3 px-6 rounded-lg text-center">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('templateForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const formData = new FormData(document.getElementById('templateForm'));
+    
+    try {
+        const response = await fetch('{{ url_for("roster.create_template") if not template else url_for("roster.edit_template", template_id=template.id) }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // Show success message
+            const message = document.createElement('div');
+            message.className = 'bg-green-100 text-green-800 p-4 rounded-lg mb-6';
+            message.textContent = '{% if template %}Template updated successfully!{% else %}Template created successfully!{% endif %}';
+            document.body.insertBefore(message, document.body.firstChild);
+            
+            // Redirect after 1 second
+            setTimeout(() => {
+                window.location.href = '{{ url_for("roster.roster_templates") }}';
+            }, 1000);
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    }
+});
+</script>
+{% endblock %}

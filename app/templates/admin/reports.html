@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Reports - Media Unit Management{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h2 class="text-3xl font-bold text-gray-800 mb-4">Reports</h2>
+    
+    <!-- Report Types -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <a href="{{ url_for('admin.reports', type='summary') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition border-l-4 border-red-600">
+            <div class="text-3xl mb-2">📊</div>
+            <h3 class="font-bold text-gray-800">Summary</h3>
+            <p class="text-gray-600 text-sm">All applicants overview</p>
+        </a>
+        
+        <a href="{{ url_for('admin.reports', type='ready_for_team') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition border-l-4 border-green-600">
+            <div class="text-3xl mb-2">✅</div>
+            <h3 class="font-bold text-gray-800">Ready for Team</h3>
+            <p class="text-gray-600 text-sm">Approved members</p>
+        </a>
+        
+        <a href="{{ url_for('admin.reports', type='needs_training') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition border-l-4 border-yellow-600">
+            <div class="text-3xl mb-2">📚</div>
+            <h3 class="font-bold text-gray-800">Needs Training</h3>
+            <p class="text-gray-600 text-sm">Pending practical test</p>
+        </a>
+        
+        <a href="{{ url_for('admin.reports', type='assigned_roles') }}" class="bg-white rounded-lg shadow p-6 hover:shadow-lg transition border-l-4 border-purple-600">
+            <div class="text-3xl mb-2">🎯</div>
+            <h3 class="font-bold text-gray-800">Assigned Roles</h3>
+            <p class="text-gray-600 text-sm">With minor roles</p>
+        </a>
+    </div>
+
+    <!-- Report Data -->
+    <div class="bg-white rounded-lg shadow p-6">
+        <h3 class="text-2xl font-bold text-gray-800 mb-4">
+            {% if report_type == 'ready_for_team' %}
+            Ready for Team Report
+            {% elif report_type == 'needs_training' %}
+            Needs Training Report
+            {% elif report_type == 'assigned_roles' %}
+            Assigned Roles Report
+            {% else %}
+            Summary Report - All Applicants
+            {% endif %}
+        </h3>
+        
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-100 border-b-2 border-gray-300">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-gray-700 font-bold">Name</th>
+                        <th class="px-6 py-3 text-left text-gray-700 font-bold">Email</th>
+                        <th class="px-6 py-3 text-left text-gray-700 font-bold">Interest</th>
+                        <th class="px-6 py-3 text-left text-gray-700 font-bold">Status</th>
+                        <th class="px-6 py-3 text-left text-gray-700 font-bold">
+                            {% if report_type == 'assigned_roles' %}
+                            Assigned Role
+                            {% else %}
+                            Latest Phase
+                            {% endif %}
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if applicants %}
+                        {% for applicant in applicants %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-50">
+                            <td class="px-6 py-3 text-gray-800 font-medium">{{ applicant.full_name }}</td>
+                            <td class="px-6 py-3 text-gray-600">{{ applicant.email }}</td>
+                            <td class="px-6 py-3 text-gray-600">{{ applicant.primary_interest }}</td>
+                            <td class="px-6 py-3">
+                                <span class="px-3 py-1 rounded-full text-sm font-bold
+                                    {% if applicant.status == 'approved' %}
+                                        bg-green-100 text-green-800
+                                    {% elif applicant.status == 'completed' %}
+                                        bg-red-100 text-red-800
+                                    {% else %}
+                                        bg-gray-100 text-gray-800
+                                    {% endif %}
+                                ">
+                                    {{ applicant.status.capitalize() }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-3 text-gray-600">
+                                {% if report_type == 'assigned_roles' %}
+                                    {{ applicant.assigned_role or 'N/A' }}
+                                {% else %}
+                                    {% set latest_phase = applicant.trial_phases[-1] if applicant.trial_phases else None %}
+                                    {% if latest_phase %}
+                                        {{ latest_phase.phase_type.replace('_', ' ').title() }}: <strong>{{ latest_phase.status.capitalize() }}</strong>
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-600">
+                            No applicants found for this report.
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if applicants %}
+        <div class="mt-6 p-4 bg-red-50 rounded border border-red-200">
+            <p class="text-gray-800">
+                <strong>Total:</strong> {{ applicants|length }} applicant(s)
+                {% if report_type == 'ready_for_team' %}
+                ready to join the team
+                {% elif report_type == 'needs_training' %}
+                need training/shadowing
+                {% elif report_type == 'assigned_roles' %}
+                with assigned minor roles
+                {% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}Home - LFC Bama Road Technical/Media Unit{% endblock %}
+
+{% block content %}
+<!-- Hero Section with Background Image -->
+<div class="relative w-screen left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] mb-12 bg-gradient-to-r from-red-900 to-red-700 text-white overflow-hidden">
+    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="relative h-96 flex flex-col items-center justify-center px-4">
+        <h1 class="text-5xl md:text-6xl font-bold text-center mb-4">Welcome to</h1>
+        <h2 class="text-6xl md:text-7xl font-bold text-center mb-6">LFC Bama Road</h2>
+        <p class="text-xl md:text-2xl text-center mb-8 text-red-100">Technical & Media Unit</p>
+        <div class="flex gap-4">
+            <a href="{{ url_for('applicant.application_form') }}" class="bg-white text-red-700 px-8 py-3 rounded-full font-bold hover:bg-red-50 transition">
+                APPLY NOW
+            </a>
+            <a href="#about" class="border-2 border-white text-white px-8 py-3 rounded-full font-bold hover:bg-white/10 transition">
+                FIND OUT MORE
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Live Streaming Section -->
+<div class="text-center mb-12 py-8 bg-gray-50 rounded-lg">
+    <h3 class="text-2xl font-bold mb-4">LIVE STREAMING STARTS IN</h3>
+    <div class="flex justify-center gap-2 text-2xl font-bold">
+        <div class="bg-gray-800 text-white px-4 py-3 rounded">0</div>
+        <div class="text-2xl">:</div>
+        <div class="bg-gray-800 text-white px-4 py-3 rounded">0</div>
+        <div class="text-2xl">:</div>
+        <div class="bg-gray-800 text-white px-4 py-3 rounded">0</div>
+        <div class="text-2xl">:</div>
+        <div class="bg-gray-800 text-white px-4 py-3 rounded">0</div>
+    </div>
+</div>
+
+<!-- Three Column Section -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+    <!-- What We Do -->
+    <div class="text-center">
+        <div class="text-5xl mb-4">🎬</div>
+        <h3 class="text-2xl font-bold mb-4">WHAT WE DO</h3>
+        <p class="text-gray-600 mb-4">We provide technical support and media services to enhance worship experiences and reach our community with excellence.</p>
+        <a href="#" class="text-red-600 hover:text-red-800 font-bold">READ MORE</a>
+    </div>
+
+    <!-- Service Times -->
+    <div class="text-center">
+        <div class="text-5xl mb-4">📍</div>
+        <h3 class="text-2xl font-bold mb-4">SERVICE TIMES</h3>
+        <p class="text-gray-600 mb-4">
+            <strong>Sunday:</strong> 10:15-11:30 AM<br>
+            <strong>Wednesday:</strong> 7:00-8:00 PM<br>
+            <strong>Online:</strong> Available 24/7
+        </p>
+        <a href="#" class="text-red-600 hover:text-red-800 font-bold">BROWSE MORE</a>
+    </div>
+
+    <!-- Watch Live -->
+    <div class="text-center">
+        <div class="text-5xl mb-4">📺</div>
+        <h3 class="text-2xl font-bold mb-4">WATCH LIVE</h3>
+        <p class="text-gray-600 mb-4">Join us online and experience worship from anywhere. Stream our services live every Sunday and Wednesday.</p>
+        <a href="#" class="text-red-600 hover:text-red-800 font-bold">WATCH LIVE</a>
+    </div>
+</div>
+
+<!-- Subunits Overview -->
+<div id="about" class="mb-12 py-8">
+    <h2 class="text-4xl font-bold text-center mb-12">OUR TECHNICAL & MEDIA TEAMS</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition">
+            <div class="text-4xl mb-4">📺</div>
+            <h3 class="text-xl font-bold text-red-700 mb-3">Display Team</h3>
+            <p class="text-gray-600">Manage live displays, visuals, and presentations during services to engage and inspire our congregation.</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition">
+            <div class="text-4xl mb-4">📷</div>
+            <h3 class="text-xl font-bold text-red-700 mb-3">Photography & Post-Processing</h3>
+            <p class="text-gray-600">Capture and edit high-quality photos from events and services for church communications.</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition">
+            <div class="text-4xl mb-4">🎙️</div>
+            <h3 class="text-xl font-bold text-red-700 mb-3">Audio - Live Mix & Stage</h3>
+            <p class="text-gray-600">Manage live audio mixing and stage sound to ensure excellent sound quality during services.</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition">
+            <div class="text-4xl mb-4">🎧</div>
+            <h3 class="text-xl font-bold text-red-700 mb-3">Audio Recording & Archiving</h3>
+            <p class="text-gray-600">Record, edit, and archive audio content for digital distribution and future reference.</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition">
+            <div class="text-4xl mb-4">🎨</div>
+            <h3 class="text-xl font-bold text-red-700 mb-3">Graphics Design</h3>
+            <p class="text-gray-600">Create compelling graphics and visual designs for marketing, promotions, and church communications.</p>
+        </div>
+        <div class="bg-white rounded-lg shadow-lg p-8 hover:shadow-xl transition">
+            <div class="text-4xl mb-4">📢</div>
+            <h3 class="text-xl font-bold text-red-700 mb-3">Content & Publicity</h3>
+            <p class="text-gray-600">Develop and manage content strategy, social media, and publicity to reach and engage our community.</p>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Announcements -->
+{% if announcements %}
+<div class="mb-12 py-8">
+    <h2 class="text-4xl font-bold text-center mb-12">RECENT UPDATES</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for announcement in announcements[:6] %}
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition">
+            <div class="bg-red-700 h-32"></div>
+            <div class="p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">{{ announcement.title }}</h3>
+                <p class="text-gray-600 text-sm mb-4">{{ announcement.content[:100] }}...</p>
+                <div class="text-xs text-gray-500">{{ announcement.created_at.strftime('%B %d, %Y') }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% if announcements|length > 6 %}
+    <div class="text-center mt-8">
+        <a href="#" class="bg-red-700 text-white px-8 py-3 rounded-full font-bold hover:bg-red-800 transition">MORE UPDATES</a>
+    </div>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- Call to Action Section -->
+<div class="bg-gradient-to-r from-red-700 to-red-900 text-white rounded-lg py-16 px-8 text-center mb-12">
+    <h2 class="text-4xl font-bold mb-4">Ready to Join Our Team?</h2>
+    <p class="text-xl mb-8 text-red-100">Share your talents and help us deliver excellent technical and media services to our congregation.</p>
+    <a href="{{ url_for('applicant.application_form') }}" class="bg-white text-red-700 px-8 py-3 rounded-full font-bold hover:bg-red-50 transition inline-block">
+        START YOUR APPLICATION TODAY
+    </a>
+</div>
+
+<script>
+    // Load member count via API
+    fetch('/api/members-count')
+        .then(r => r.json())
+        .then(d => document.getElementById('member-count').textContent = d.count)
+        .catch(() => {});
+</script>
+{% endblock %}

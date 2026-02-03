@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% block title %}{{ applicant.full_name }} - Media Unit Management{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <a href="{{ url_for('admin.applicants_list') }}" class="text-blue-600 hover:underline">← Back to Applicants</a>
+    <h2 class="text-3xl font-bold text-gray-800 mt-4">{{ applicant.full_name }}</h2>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Main Info -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Personal Info -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Personal Information</h3>
+            <div class="grid grid-cols-2 gap-4 text-gray-700">
+                <div>
+                    <div class="text-sm text-gray-500">Email</div>
+                    <div class="font-medium">{{ applicant.email }}</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-500">Phone</div>
+                    <div class="font-medium">{{ applicant.phone or 'N/A' }}</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-500">Primary Interest</div>
+                    <div class="font-medium">{{ applicant.primary_interest }}</div>
+                </div>
+                <div>
+                    <div class="text-sm text-gray-500">Applied</div>
+                    <div class="font-medium">{{ applicant.created_at.strftime('%b %d, %Y') }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Professional Background -->
+        {% if applicant.professional_background %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Professional Background</h3>
+            <p class="text-gray-700">{{ applicant.professional_background }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Availability -->
+        {% if applicant.availability %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Availability</h3>
+            <p class="text-gray-700">{{ applicant.availability }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Skills Assessment -->
+        {% if applicant.skills %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Skills Assessment</h3>
+            <div class="space-y-2">
+                {% for skill in applicant.skills %}
+                <div class="flex items-center justify-between">
+                    <span class="text-gray-700">{{ skill.skill_name }}</span>
+                    <div class="flex space-x-1">
+                        {% for i in range(1, 6) %}
+                        <div class="w-8 h-8 rounded {% if i <= skill.rating %}bg-blue-500{% else %}bg-gray-300{% endif %} flex items-center justify-center text-white text-xs">{{ i }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Portfolio -->
+        {% if applicant.portfolio_files %}
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Portfolio Files</h3>
+            <div class="space-y-2">
+                {% for file in applicant.portfolio_files %}
+                <div class="flex items-center justify-between bg-gray-50 p-3 rounded">
+                    <div>
+                        <div class="font-medium text-gray-800">{{ file.filename }}</div>
+                        <div class="text-sm text-gray-500">{{ file.uploaded_at.strftime('%b %d, %Y') }}</div>
+                    </div>
+                    <a href="#" class="text-blue-600 hover:underline text-sm">Download</a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Trial Phases -->
+        <div class="bg-white rounded-lg shadow p-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Trial Phases</h3>
+            <div class="space-y-4">
+                {% for phase in applicant.trial_phases %}
+                <div class="border rounded p-4">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="font-bold text-gray-800">
+                                {% if phase.phase_type == 'portfolio_review' %}
+                                📋 Portfolio Review
+                                {% elif phase.phase_type == 'shadow_service' %}
+                                👥 Shadow Service
+                                {% elif phase.phase_type == 'practical_test' %}
+                                🎯 Practical Test
+                                {% endif %}
+                            </h4>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-sm font-bold
+                            {% if phase.status == 'pending' %}
+                                bg-gray-100 text-gray-800
+                            {% elif phase.status == 'pass' %}
+                                bg-green-100 text-green-800
+                            {% elif phase.status == 'fail' %}
+                                bg-red-100 text-red-800
+                            {% else %}
+                                bg-blue-100 text-blue-800
+                            {% endif %}
+                        ">
+                            {{ phase.status.capitalize() }}
+                        </span>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('admin.update_trial_phase', applicant_id=applicant.id, phase_id=phase.id) }}" class="space-y-3">
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-sm text-gray-700 font-bold mb-1">Status</label>
+                                <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded text-sm">
+                                    <option value="pending" {% if phase.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="completed" {% if phase.status == 'completed' %}selected{% endif %}>Completed</option>
+                                    <option value="pass" {% if phase.status == 'pass' %}selected{% endif %}>Pass</option>
+                                    <option value="fail" {% if phase.status == 'fail' %}selected{% endif %}>Fail</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-700 font-bold mb-1">Score</label>
+                                <input type="number" name="score" min="0" max="100" class="w-full px-3 py-2 border border-gray-300 rounded text-sm" value="{{ phase.score or '' }}">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-700 font-bold mb-1">Notes</label>
+                            <textarea name="notes" class="w-full px-3 py-2 border border-gray-300 rounded text-sm" rows="3">{{ phase.notes or '' }}</textarea>
+                        </div>
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-bold">Update Phase</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <!-- Status & Assignment -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Assignment & Status</h3>
+            
+            <form method="POST" action="{{ url_for('admin.update_applicant', applicant_id=applicant.id) }}" class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-700 font-bold mb-2">Application Status</label>
+                    <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded">
+                        <option value="pending" {% if applicant.status == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="approved" {% if applicant.status == 'approved' %}selected{% endif %}>Approved</option>
+                        <option value="completed" {% if applicant.status == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="rejected" {% if applicant.status == 'rejected' %}selected{% endif %}>Rejected</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-700 font-bold mb-2">Assigned Subunit</label>
+                    <select name="assigned_subunit_id" class="w-full px-3 py-2 border border-gray-300 rounded">
+                        <option value="">Select subunit</option>
+                        {% for subunit in subunits %}
+                        <option value="{{ subunit.id }}" {% if applicant.assigned_subunit_id == subunit.id %}selected{% endif %}>{{ subunit.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-700 font-bold mb-2">Minor Role</label>
+                    <input type="text" name="assigned_role" placeholder="e.g., Equipment Assistant" class="w-full px-3 py-2 border border-gray-300 rounded" value="{{ applicant.assigned_role or '' }}">
+                </div>
+
+                <div>
+                    <label class="block text-sm text-gray-700 font-bold mb-2">Assign Mentor</label>
+                    <select name="assigned_mentor_id" class="w-full px-3 py-2 border border-gray-300 rounded">
+                        <option value="">Select mentor</option>
+                        {% for user in users %}
+                        <option value="{{ user.id }}" {% if applicant.assigned_mentor_id == user.id %}selected{% endif %}>{{ user.username }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-bold">
+                    Save Changes
+                </button>
+            </form>
+        </div>
+
+        <!-- Info Card -->
+        <div class="bg-blue-50 rounded-lg p-6 border-l-4 border-blue-600">
+            <h4 class="font-bold text-gray-800 mb-3">Application Info</h4>
+            <div class="text-sm space-y-2 text-gray-700">
+                <div><span class="text-gray-600">ID:</span> #{{ applicant.id }}</div>
+                <div><span class="text-gray-600">Status:</span> {{ applicant.status.capitalize() }}</div>
+                <div><span class="text-gray-600">Applied:</span> {{ applicant.created_at.strftime('%b %d, %Y') }}</div>
+                <div><span class="text-gray-600">Updated:</span> {{ applicant.updated_at.strftime('%b %d, %Y') }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
